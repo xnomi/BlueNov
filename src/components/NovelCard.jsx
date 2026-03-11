@@ -10,7 +10,7 @@ export default function NovelCard({ novel, style }) {
                 {/* Cover Image */}
                 <div className="img-wrapper position-relative">
                     <img
-                        src={novel.cover && novel.cover.startsWith('/uploads') ? `http://localhost:5000${novel.cover}` : novel.cover}
+                        src={novel.cover && novel.cover.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || ''}${novel.cover}` : novel.cover}
                         alt={`${novel.title} cover`}
                         className="card-img-top"
                         loading="lazy"

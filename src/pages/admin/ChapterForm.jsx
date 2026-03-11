@@ -53,7 +53,7 @@ export default function ChapterForm() {
         };
 
         try {
-            const res = await fetch(`http://localhost:5000/api/novels/${novel.id}/chapters`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/novels/${novel.id}/chapters`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newChapter)

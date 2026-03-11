@@ -31,18 +31,18 @@ function appReducer(state, action) {
         case 'UPDATE_NOVEL':
             return {
                 ...state,
-                novels: state.novels.map(n =>
+                novels: (state.novels || []).map(n =>
                     n.id === action.payload.id ? { ...n, ...action.payload } : n
                 ),
             };
         case 'DELETE_NOVEL':
-            return { ...state, novels: state.novels.filter(n => n.id !== action.payload) };
+            return { ...state, novels: (state.novels || []).filter(n => n.id !== action.payload) };
         case 'ADD_CHAPTER':
             return {
                 ...state,
-                novels: state.novels.map(n =>
+                novels: (state.novels || []).map(n =>
                     n.id === action.payload.novelId
-                        ? { ...n, chapters: [...n.chapters, action.payload.chapter] }
+                        ? { ...n, chapters: [...(n.chapters || []), action.payload.chapter] }
                         : n
                 ),
             };
@@ -87,16 +87,20 @@ export function AppProvider({ children }) {
     // Fetch novels from backend API
     useEffect(() => {
         // Only fetch once on mount
-        fetch('http://localhost:5000/api/novels')
-            .then(res => res.json())
-            .then(data => {
+        const fetchNovels = async () => {
+            try {
+                const baseUrl = import.meta.env.VITE_API_URL || '';
+                const res = await fetch(`${baseUrl}/api/novels`);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
                 dispatch({ type: 'SET_NOVELS', payload: data });
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error("Failed to fetch novels from API:", err);
                 // Fallback empty state is already handled by initialState
                 dispatch({ type: 'SET_NOVELS', payload: [] });
-            });
+            }
+        };
+        fetchNovels();
     }, []);
 
     // Persist admin auth to session storage
@@ -105,7 +109,7 @@ export function AppProvider({ children }) {
     }, [state.adminAuth]);
 
     // Computed: filtered novels
-    const filteredNovels = state.novels.filter(novel => {
+    const filteredNovels = (state.novels || []).filter(novel => {
         const matchesSearch =
             !state.searchQuery ||
             novel.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
@@ -117,7 +121,7 @@ export function AppProvider({ children }) {
         return matchesSearch && matchesGenre && matchesStatus;
     });
 
-    const getNovelById = (id) => state.novels.find(n => n.id === id) || null;
+    const getNovelById = (id) => (state.novels || []).find(n => n.id === id) || null;
 
     const adminLogin = (username, password) => {
         if (username === 'admin' && password === 'password123') {

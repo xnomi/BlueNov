@@ -1,4 +1,4 @@
-const { run, db } = require('./db');
+const { run, pool } = require('./db');
 const { v4: uuidv4 } = require('uuid');
 
 const DUMMY_NOVELS = [
@@ -30,13 +30,13 @@ const DUMMY_NOVELS = [
 
 (async () => {
     try {
-        console.log("Seeding SQLite database...");
+        console.log("Seeding MySQL database...");
         for (let n of DUMMY_NOVELS) {
             const updatedAt = new Date().toISOString();
-            await run('INSERT OR IGNORE INTO novels (id, title, author, cover, synopsis, status, views, rating, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [n.id, n.title, n.author, n.cover, n.synopsis, n.status, n.views, n.rating, updatedAt]);
+            await run('INSERT IGNORE INTO novels (id, title, author, cover, synopsis, status, views, rating, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [n.id, n.title, n.author, n.cover, n.synopsis, n.status, n.views, n.rating, updatedAt]);
 
             for (let g of n.genres) {
-                await run('INSERT OR IGNORE INTO genres (novel_id, genre) VALUES (?, ?)', [n.id, g]);
+                await run('INSERT IGNORE INTO genres (novel_id, genre) VALUES (?, ?)', [n.id, g]);
             }
             console.log('Imported: ' + n.title);
         }
@@ -44,6 +44,6 @@ const DUMMY_NOVELS = [
     } catch (e) {
         console.error("Seeding failed:", e);
     } finally {
-        db.close();
+        pool.end();
     }
 })();

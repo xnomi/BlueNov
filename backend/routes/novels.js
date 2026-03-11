@@ -114,7 +114,7 @@ router.put('/:id', upload.single('coverImage'), async (req, res) => {
 
         const { title, author, synopsis, status, views, rating, genres } = req.body;
 
-        let coverUrl = req.body.cover;
+        let coverUrl = req.body.cover || null;
         if (req.file) {
             coverUrl = `/uploads/${req.file.filename}`;
         }

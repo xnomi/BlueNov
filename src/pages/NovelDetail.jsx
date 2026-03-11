@@ -70,7 +70,7 @@ export default function NovelDetail() {
                         {/* Cover + Actions */}
                         <Col md={3} className="text-center text-md-start animate-fadeInUp">
                             <img
-                                src={novel.cover && novel.cover.startsWith('/uploads') ? `http://localhost:5000${novel.cover}` : novel.cover}
+                                src={novel.cover && novel.cover.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || ''}${novel.cover}` : novel.cover}
                                 alt={novel.title}
                                 loading="lazy"
                                 style={{

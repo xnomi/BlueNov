@@ -72,7 +72,7 @@ export default function NovelForm() {
         }
 
         try {
-            const url = isEdit ? `http://localhost:5000/api/novels/${form.id}` : 'http://localhost:5000/api/novels';
+            const url = isEdit ? `${import.meta.env.VITE_API_URL || ''}/api/novels/${form.id}` : `${import.meta.env.VITE_API_URL || ''}/api/novels`;
             const method = isEdit ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -180,7 +180,7 @@ export default function NovelForm() {
                                     {form.cover && (
                                         <div className="mt-2">
                                             <img
-                                                src={form.cover.startsWith('blob:') ? form.cover : `http://localhost:5000${form.cover}`}
+                                                src={form.cover.startsWith('blob:') ? form.cover : `${import.meta.env.VITE_API_URL || ''}${form.cover}`}
                                                 alt="Preview"
                                                 style={{ height: 100, borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
                                                 onError={e => { e.target.style.display = 'none'; }}
