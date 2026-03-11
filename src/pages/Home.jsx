@@ -9,7 +9,35 @@ import NovelCard from '../components/NovelCard';
 const FEATURED_ID = '1';
 
 export default function Home() {
-    const { novels } = useApp();
+    const { novels, isLoadingNovels } = useApp();
+
+    if (isLoadingNovels) {
+        return (
+            <div className="page-wrapper">
+                <Navbar />
+                <Container className="py-5 text-center" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <h2>Loading...</h2>
+                </Container>
+                <Footer />
+            </div>
+        );
+    }
+
+    if (!novels || novels.length === 0) {
+        return (
+            <div className="page-wrapper">
+                <Navbar />
+                <main className="main-content">
+                    <Container className="py-5 text-center" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <h2>Service Unavailable</h2>
+                        <p style={{ color: 'var(--text-secondary)' }}>We couldn't load novels at this time. Please try again later.</p>
+                    </Container>
+                </main>
+                <Footer />
+            </div>
+        );
+    }
+
     const featured = novels.find(n => n.id === FEATURED_ID) || novels[0];
     const recent = [...novels].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 6);
     const popular = [...novels].sort((a, b) => b.views - a.views).slice(0, 6);

@@ -32,3 +32,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Backend Server listening on http://localhost:${PORT}`);
 });
+
+module.exports = app;
