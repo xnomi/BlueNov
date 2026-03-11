@@ -4,19 +4,10 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { query, run } = require('../db');
+const { put } = require('@vercel/blob');
 
-// Multer Config for Local Image Uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '..', 'uploads'));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname);
-        cb(null, `cover-${uniqueSuffix}${ext}`);
-    }
-});
-const upload = multer({ storage });
+// Multer Config for Memory Storage (Vercel Blob)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Helper function to assemble a novel with its genres and chapters
 async function getNovelFullDetails(novelId) {
@@ -73,11 +64,15 @@ router.post('/', upload.single('coverImage'), async (req, res) => {
         const id = uuidv4();
         const { title, author, synopsis, status, views, rating, genres } = req.body;
 
-        // Handle cover: either uploaded file URL or provided cover path/URL string
-        // Multer handles the file. If provided, save the local path.
         let coverUrl = req.body.cover || null;
         if (req.file) {
-            coverUrl = `/uploads/${req.file.filename}`; // Local URL accessible statically
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = path.extname(req.file.originalname);
+            const blob = await put(`covers/cover-${uniqueSuffix}${ext}`, req.file.buffer, {
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN
+            });
+            coverUrl = blob.url;
         }
 
         const updatedAt = new Date().toISOString();
@@ -116,7 +111,13 @@ router.put('/:id', upload.single('coverImage'), async (req, res) => {
 
         let coverUrl = req.body.cover || null;
         if (req.file) {
-            coverUrl = `/uploads/${req.file.filename}`;
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const ext = path.extname(req.file.originalname);
+            const blob = await put(`covers/cover-${uniqueSuffix}${ext}`, req.file.buffer, {
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN
+            });
+            coverUrl = blob.url;
         }
 
         const updatedAt = new Date().toISOString();
